@@ -35,7 +35,7 @@ def generate_orders(region, n, customer_count=500_000):
                 random.randint(1, customer_count),
                 fake.date_between(start_date="-1d", end_date="today"),
                 round(random.uniform(20.0, 1000.0), 2),
-                region,
+                region
             )
             for i in range(1, n + 1)
         ]
@@ -45,7 +45,7 @@ def generate_orders(region, n, customer_count=500_000):
                 StructField("customer_id", IntegerType(), False),
                 StructField("order_date", DateType(), False),
                 StructField("total", FloatType(), False),
-                StructField("region", StringType(), False),
+                StructField("region", StringType(), False)
             ]
         )
         print(f"Generated {n} orders for region: {region}")
@@ -65,7 +65,7 @@ def generate_order_items(region, n, order_count=1_000_000, product_count=800_000
                 random.randint(1, product_count),
                 random.randint(1, 5),
                 round(random.uniform(5.0, 300.0), 2),
-                region,
+                region
             )
             for _ in range(n)
         ]
@@ -75,7 +75,7 @@ def generate_order_items(region, n, order_count=1_000_000, product_count=800_000
                 StructField("product_id", IntegerType(), False),
                 StructField("quantity", IntegerType(), False),
                 StructField("price", FloatType(), False),
-                StructField("region", StringType(), False),
+                StructField("region", StringType(), False)
             ]
         )
         print(f"Generated {n} order items for region: {region}")
@@ -97,7 +97,7 @@ def generate_payments(region, n, order_count=1_000_000):
                 random.choice(methods),
                 random.choice(statuses),
                 fake.date_time_between(start_date="-1d", end_date="now"),
-                region,
+                region
             )
             for i in range(1, n + 1)
         ]
@@ -108,7 +108,7 @@ def generate_payments(region, n, order_count=1_000_000):
                 StructField("method", StringType(), False),
                 StructField("status", StringType(), False),
                 StructField("timestamp", TimestampType(), False),
-                StructField("region", StringType(), False),
+                StructField("region", StringType(), False)
             ]
         )
         print(f"Generated {n} payments for region: {region}")
@@ -118,16 +118,13 @@ def generate_payments(region, n, order_count=1_000_000):
         return None
 
 
-def save_as_single_file(df, output_path, file_name):
+def save_with_default_partitions(df, output_path, file_name):
     """Save a DataFrame as a single Parquet file directly to S3."""
     try:
         # Define the full S3 path
         s3_path = f"{output_path}{file_name}.parquet"
-
-        # Write the DataFrame directly to S3
-        df.coalesce(1).write.mode("overwrite").parquet(s3_path)
-
-        print(f"Saved {file_name}.parquet to {s3_path}")
+        df.write.mode("overwrite").parquet(s3_path)
+        print(f"Saved {file_name}.parquet to {s3_path} (default partitions)")
     except Exception as e:
         print(f"Error saving DataFrame to S3: {e}")
 
@@ -139,7 +136,7 @@ if __name__ == "__main__":
         parser.add_argument(
             "--output-path",
             required=True,
-            help="S3 path to save the generated Parquet files",
+            help="S3 path to save the generated Parquet files"
         )
         args = parser.parse_args()
 
@@ -155,13 +152,9 @@ if __name__ == "__main__":
 
         # Define record counts for each dataset
         record_counts = {
-            "orders": [
-                1_000_000,
-                800_000,
-                1_200_000,
-            ],  # Different record counts for each region
+            "orders": [1_000_000, 800_000, 1_200_000],
             "order_items": [600_000, 500_000, 700_000],
-            "payments": [500_000, 400_000, 600_000],
+            "payments": [500_000, 400_000, 600_000]
         }
 
         for i, region in enumerate(regions):
@@ -170,17 +163,21 @@ if __name__ == "__main__":
             order_items = generate_order_items(region, record_counts["order_items"][i])
             payments = generate_payments(region, record_counts["payments"][i])
 
-            # Save datasets to single Parquet files
-            save_as_single_file(
-                orders, output_path, f"orders_{region.replace(' ', '_')}_{today}"
+            # Save datasets to Parquet files usingdefault partitions
+            save_with_default_partitions(
+                orders,
+                output_path,
+                f"orders_{region.replace(' ', '_')}_{today}"
             )
-            save_as_single_file(
+            save_with_default_partitions(
                 order_items,
                 output_path,
-                f"order_items_{region.replace(' ', '_')}_{today}",
+                f"order_items_{region.replace(' ', '_')}_{today}"
             )
-            save_as_single_file(
-                payments, output_path, f"payments_{region.replace(' ', '_')}_{today}"
+            save_with_default_partitions(
+                payments,
+                output_path,
+                f"payments_{region.replace(' ', '_')}_{today}"
             )
 
         print("Data generation and saving completed successfully.")

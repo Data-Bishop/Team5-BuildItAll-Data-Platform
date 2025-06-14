@@ -75,22 +75,22 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Upload setup.sh to S3
         run: |
-          aws s3 cp orchestration/setup.sh s3://builditall-airflow/setup.sh
+          aws s3 cp orchestration/setup.sh ${{ vars.AIRFLOW_BUCKET }}/setup.sh
       - name: Upload start-airflow.sh to S3
         run: |
-          aws s3 cp orchestration/start-airflow.sh s3://builditall-airflow/start-airflow.sh
+          aws s3 cp orchestration/start-airflow.sh ${{ vars.AIRFLOW_BUCKET }}/start-airflow.sh
       - name: Upload docker-compose.yml to S3
         run: |
-          aws s3 cp orchestration/docker-compose.yml s3://builditall-airflow/docker-compose.yml
+          aws s3 cp orchestration/docker-compose.yml ${{ vars.AIRFLOW_BUCKET }}/docker-compose.yml
       - name: Upload Dockerfile to S3
         run: |
-          aws s3 cp orchestration/Dockerfile s3://builditall-airflow/Dockerfile
+          aws s3 cp orchestration/Dockerfile ${{ vars.AIRFLOW_BUCKET }}/Dockerfile
       - name: Upload Dag requirements.txt to S3
         run: |
-          aws s3 cp orchestration/requirements.txt s3://builditall-airflow/requirements/requirements.txt
+          aws s3 cp orchestration/requirements.txt ${{ vars.AIRFLOW_BUCKET }}/requirements/requirements.txt
       - name: Upload Dags to S3
         run: |
-          aws s3 cp orchestration/dags/ s3://builditall-airflow/dags/ --recursive
+          aws s3 sync orchestration/dags/ ${{ vars.AIRFLOW_BUCKET }}/dags/
       - name: Upload Spark Jobs to S3 
         run: |
-          aws s3 cp spark_jobs/ s3://builditall-client-data/scripts/ --recursive          
+          aws s3 sync spark_jobs/ ${{ vars.DATA_BUCKET }}/scripts/   

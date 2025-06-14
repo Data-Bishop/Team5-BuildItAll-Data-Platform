@@ -40,7 +40,7 @@ def process_and_union_files(input_path, output_path, dataset_name):
 
         # Write the unioned DataFrame back to S3 as a single Parquet file
         output_file_path = f"{output_path}{dataset_name}.parquet"
-        df.coalesce(1).write.mode("overwrite").parquet(output_file_path)
+        df.write.mode("overwrite").parquet(output_file_path)
 
         print(f"Processed and saved {dataset_name} to: {output_file_path}")
     except Exception as e:
@@ -54,12 +54,12 @@ if __name__ == "__main__":
         parser.add_argument(
             "--input-path",
             required=True,
-            help="Base S3 input path for the Parquet files",
+            help="Base S3 input path for the Parquet files"
         )
         parser.add_argument(
             "--output-path",
             required=True,
-            help="Base S3 output path for the processed files",
+            help="Base S3 output path for the processed files"
         )
         args = parser.parse_args()
 
